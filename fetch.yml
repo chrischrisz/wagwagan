@@ -1,0 +1,32 @@
+name: Fetch WagForex Scorecard
+
+on:
+  schedule:
+    # Every 15 minutes. Score posts hourly, so this gives plenty of margin.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}  # lets you trigger it manually from the Actions tab too
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install telethon gspread google-auth
+
+      - name: Run fetch script
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION: ${{ secrets.TG_SESSION }}
+          TG_GROUP: ${{ secrets.TG_GROUP }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python fetch_scorecard.py
